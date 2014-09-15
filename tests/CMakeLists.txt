@@ -9,16 +9,19 @@ find_package(GMP REQUIRED)
 include_directories(${GMP_INCLUDE_DIR})
 
 find_package(Boost COMPONENTS random REQUIRED)
+
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARYDIR})
 
 set(SOURCES
-   orientation.cpp
-   has_intersection.cpp
-   contains.cpp
-   convex_hull.cpp
-   dynamic_convex_hull.cpp
-   convex.cpp
+   #triangulation.cpp
+   #orientation.cpp
+   #has_intersection.cpp
+   #contains.cpp
+   #convex_hull.cpp
+   #dynamic_convex_hull.cpp
+   #convex.cpp
+   skip_quadtree.cpp
 )
 
 add_executable(cg-test ${SOURCES})

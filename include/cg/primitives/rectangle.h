@@ -21,6 +21,11 @@ namespace cg
          , y(y)
       {}
 
+      rectangle_2t(point_2t<Scalar> const & dlc, point_2t<Scalar> const & urc)
+         : x(dlc.x, urc.x)
+         , y(dlc.y, urc.y)
+      {}
+
       rectangle_2t() {}
 
       bool is_empty() const
@@ -49,6 +54,12 @@ namespace cg
    rectangle_2t<Scalar> const operator & (rectangle_2t<Scalar> const & a, rectangle_2t<Scalar> const & b)
    {
       return rectangle_2t<Scalar>(a.x & b.x, a.y & b.y);
+   }
+
+   template <class Scalar>
+   bool operator == (rectangle_2t<Scalar> const & a, rectangle_2t<Scalar> const & b)
+   {
+      return a.x == b.x && a.y == b.y;
    }
 
    inline point_2f center(rectangle_2f const & rect)

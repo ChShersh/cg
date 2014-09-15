@@ -1,4 +1,7 @@
 #pragma once
+
+#include <cg/primitives/point.h>
+
 #include <random>
 #include <string>
 
@@ -56,5 +59,28 @@ namespace util
 
         return result;
     }
-}
 
+    inline cg::point_2 random_point(double minx, double maxx, double miny, double maxy)
+    {
+        uniform_random_real<double> xdomain(minx, maxx);
+        uniform_random_real<double> ydomain(miny, maxy);
+
+        cg::point_2 res;
+        xdomain >> res.x;
+        ydomain >> res.y;
+
+        return res;
+    }
+
+    inline std::vector<cg::point_2> uniform_points(size_t count)
+    {
+        std::vector<cg::point_2> res(count);
+
+        for (size_t l = 0; l != count; ++l)
+        {
+            res[l] = random_point(-200, 200, -200, 200);
+        }
+
+        return res;
+    }
+}

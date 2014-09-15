@@ -1,5 +1,8 @@
 add_subdirectory(viewer)
 add_subdirectory(operations)
 add_subdirectory(orientation)
+add_subdirectory(triangulation)
 add_subdirectory(convex_hull)
 add_subdirectory(convex)
+
+add_subdirectory(skip_quadtree)

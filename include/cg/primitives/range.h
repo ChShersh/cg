@@ -45,6 +45,12 @@ namespace cg
       return range_t<Scalar>(std::max(a.inf, b.inf), std::min(a.sup, b.sup));
    }
 
+   template <class Scalar>
+   bool operator == (range_t<Scalar> const & a, range_t<Scalar> const & b)
+   {
+      return a.inf == b.inf && a.sup == b.sup;
+   }
+
    inline float center(range_f const & r)
    {
       return .5f + r.inf / 2.f + r.sup / 2.f;

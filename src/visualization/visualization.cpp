@@ -11,6 +11,7 @@ namespace visualization
       main_window_t * wnd = new main_window_t(viewer);
       viewer->set_window(wnd);
       wnd->setWindowTitle(title);
+      wnd->resize(1024, 768);
       wnd->show();
       qApp->exec();
    }
