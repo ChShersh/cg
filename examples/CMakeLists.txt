@@ -4,5 +4,7 @@ add_subdirectory(orientation)
 add_subdirectory(triangulation)
 add_subdirectory(convex_hull)
 add_subdirectory(convex)
+add_subdirectory(ml_test)
+add_subdirectory(doubly_connected_edge_list)
 
 add_subdirectory(skip_quadtree)

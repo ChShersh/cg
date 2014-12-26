@@ -140,34 +140,6 @@ namespace cg
             return this->shared_from_this();
         }
 
-        std::shared_ptr<QuadNode> insert_in_existed(std::shared_ptr<QuadNode> & old_child,
-                                                    const point_2t<Scalar> & old_pt,
-                                                    const point_2t<Scalar> & p,
-                                                    std::unordered_map<Mask, std::shared_ptr<QuadNode>> & node_map)
-        {
-            point_2t<Scalar> old_child_pt(old_pt.x, old_pt.ly);
-            Scalar plx = lx, ply = ly, prx = rx, pry = ry;
-            int old_child_id, point_id;
-            Mask new_mask = my_mask;
-            do {
-                old_child_id = id_from_parent(plx, ply, prx, pry, old_child_pt),
-                point_id     = id_from_parent(plx, ply, prx, pry, p);
-                if (old_child_id != point_id) break;
-                auto c = coordinates_by_id(plx, ply, prx, pry, point_id);
-                plx = c[0]; ply = c[1]; prx = c[2]; pry = c[3];
-                new_mask = mask_from_parent(new_mask, point_id);
-            } while (true);
-
-            auto new_child = std::make_shared<QuadNode>(plx, ply, prx, pry);
-            new_child->is_leaf = false;
-            node_map[new_mask] = new_child;
-
-            if (old_child) new_child->children[old_child_id] = old_child;
-            else new_child = new_child->insert(old_pt, node_map);
-
-            return new_child->insert(p, node_map);
-        }
-
         std::shared_ptr<QuadNode> insert(const point_2t<Scalar> & p,
                                          std::unordered_map<Mask, std::shared_ptr<QuadNode>> & node_map)
         {

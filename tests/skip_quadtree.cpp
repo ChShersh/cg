@@ -135,9 +135,9 @@ TEST(approx_rect_speed, naive_quadtree)
     using cg::range;
 
     auto points = util::uniform_points(10000);
-    quadtree<double> * tree = new quadtree<double>(-2000, -2000, 2000, 2000);
+    quadtree<double> * tree = new quadtree<double>(-200, -200, 200, 200);
 
-    rectangle_2 rect = {range{-1500, 1500}, range{-1500, 1500}};
+    rectangle_2 rect = {range{-150, 150}, range{-150, 150}};
 
     std::set<point_2> in_rect;
     for (auto pt : points) {
@@ -146,7 +146,7 @@ TEST(approx_rect_speed, naive_quadtree)
     }
 
     std::vector<point_2> output;
-    tree->rectangle_query(rect, 10, output);
+    tree->rectangle_query(rect, 0.001, output);
     std::set<point_2> output_set(output.begin(), output.end());
 
     bool all_have = true;
@@ -165,9 +165,9 @@ TEST(approx_rect_speed, compressed_quadtree)
     using cg::range;
 
     auto points = util::uniform_points(10000);
-    compressed_quadtree<double>  tree(-2000, -2000, 2000, 2000);
+    compressed_quadtree<double>  tree(-200, -200, 200, 200);
 
-    rectangle_2 rect = {range{-1500, 1500}, range{-1500, 1500}};
+    rectangle_2 rect = {range{-150, 150}, range{-150, 100}};
 
     std::set<point_2> in_rect;
     for (auto pt : points) {
@@ -176,7 +176,7 @@ TEST(approx_rect_speed, compressed_quadtree)
     }
 
     std::vector<point_2> output;
-    tree.rectangle_query(rect, 10, output);
+    tree.rectangle_query(rect, 0.001, output);
     std::set<point_2> output_set(output.begin(), output.end());
 
     bool all_have = true;
@@ -196,9 +196,9 @@ TEST(approx_rect_speed, skip_quadtree)
     using cg::range;
 
     auto points = util::uniform_points(10000);
-    skip_quadtree<double>  tree(-2000, -2000, 2000, 2000);
+    skip_quadtree<double>  tree(-200, -200, 200, 200);
 
-    rectangle_2 rect = {range{-1500, 1500}, range{-1500, 1500}};
+    rectangle_2 rect = {range{-150, 150}, range{-150, 150}};
 
     std::set<point_2> in_rect;
     for (auto pt : points) {
@@ -207,7 +207,7 @@ TEST(approx_rect_speed, skip_quadtree)
     }
 
     std::vector<point_2> output;
-    tree.approx_rect_query(rect, 10, output, 0);
+    tree.approx_rect_query(rect, 0.001, output, 0);
     std::set<point_2> output_set(output.begin(), output.end());
 
     bool all_have = true;

@@ -255,6 +255,37 @@ void main_window_t::keyReleaseEvent(QKeyEvent * event)
       auto txt = boost::lexical_cast<std::string>(current_pos_);
       QApplication::clipboard()->setText(txt.c_str());
    }
+   else if (event->key() == Qt::Key_Plus)
+   {
+       double old_zoom = zoom_;
+
+       int delta = -200.0 / 8 / 15;
+       if (delta > 0)
+       {
+          for (int i = 0; i != delta; ++i)
+             zoom_ *= 1.1;
+       }
+       else if (delta < 0)
+       {
+          for (int i = 0; i != delta; --i)
+             zoom_ /= 1.1;
+       }
+
+       point_2f pos(0, 0);
+       point_2f sz(size().width() / 2, size().height() / 2);
+
+       vector_2f diff = pos - sz;
+
+       center_ += (old_zoom - zoom_) * vector_2f(diff.x, -diff.y);
+       center_ = limit(center_);
+
+       event->accept();
+
+       viewer_->on_move(limit(screen_to_global(QPoint(0, 0))));
+
+       resize_impl(size().width(), size().height());
+       updateGL();
+   }
    else if (viewer_->on_key(event->key()))
    {
       drawer_.clear();
