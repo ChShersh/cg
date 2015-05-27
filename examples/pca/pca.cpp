@@ -26,16 +26,23 @@ struct pca_viewer : cg::visualization::viewer_adapter
     pca_viewer()
         : pca_type(cg::standard_pca),
           eig_ret(boost::none),
-          drag_cursor(boost::none)
+          drag_cursor(boost::none),
+          alpha(1), exp_mode(false)
     {
         wpca.set_weight(cg::unit_weight());
     }
 
     void draw(cg::visualization::drawer_type & drawer) const
     {
+        // axis
         drawer.set_color(Qt::red);
         drawer.draw_line(point_2{0, -300}, point_2{0, 300});
         drawer.draw_line(point_2{-300, 0}, point_2{300, 0});
+
+        // unit square
+        drawer.set_color(Qt::darkGreen);
+        drawer.draw_line(point_2{0, 1}, point_2{1, 1});
+        drawer.draw_line(point_2{1, 0}, point_2{1, 1});
 
         drawer.set_color(Qt::green);
         for (point_2 p : points) {
@@ -66,7 +73,8 @@ struct pca_viewer : cg::visualization::viewer_adapter
                           << "press 's' for PCA (default)" << cg::visualization::endl
                           << "press 'h' for manhattan WPCA" << cg::visualization::endl
                           << "press 'e' for euclidian WPCA" << cg::visualization::endl
-                          << "press 'm' for mahalanobis WPCA" << cg::visualization::endl;
+                          << "press 'm' for mahalanobis WPCA" << cg::visualization::endl
+                          << "press 'x' for exponential mode" << cg::visualization::endl;
 
         p.corner_stream() << "current mode: ";
         switch (pca_type) {
@@ -74,6 +82,14 @@ struct pca_viewer : cg::visualization::viewer_adapter
             case cg::manhattan_pca: p.corner_stream() << "manhattan"; break;
             case cg::euclidian_pca: p.corner_stream() << "euclidian"; break;
             case cg::mahalanobis_pca: p.corner_stream() << "mahalanobis"; break;
+        }
+        p.corner_stream() << cg::visualization::endl;
+
+        p.corner_stream() << "exp mode: ";
+        if (exp_mode) {
+            p.corner_stream() << "on (with alpha = " << alpha << ")";
+        } else {
+            p.corner_stream() << "off";
         }
         p.corner_stream() << cg::visualization::endl;
     }
@@ -121,21 +137,45 @@ struct pca_viewer : cg::visualization::viewer_adapter
         switch (key) {
             case Qt::Key_S:
                 pca_type = cg::standard_pca;
-                wpca.set_weight(cg::unit_weight());
+                w = cg::unit_weight();
                 break;
             case Qt::Key_H:
                 pca_type = cg::manhattan_pca;
-                wpca.set_weight(cg::manhattan_weight());
+                w = cg::manhattan_weight();
                 break;
             case Qt::Key_E:
                 pca_type = cg::euclidian_pca;
-                wpca.set_weight(cg::euclidian_weight());
+                w = cg::euclidian_weight();
                 break;
             case Qt::Key_M:
                 pca_type = cg::mahalanobis_pca;
-                wpca.set_weight(cg::mahalanobis_weight(points));
+                w = cg::mahalanobis_weight(points);
+                break;
+            case Qt::Key_X:
+                exp_mode = !exp_mode;
+                break;
+            case Qt::Key_1:
+                alpha = 0.5;
+                break;
+            case Qt::Key_2:
+                alpha = 1;
+                break;
+            case Qt::Key_3:
+                alpha = 2;
+                break;
+            case Qt::Key_4:
+                alpha = 3;
+                break;
+            case Qt::Key_5:
+                alpha = 4;
                 break;
             default: return false;
+        }
+
+        if (exp_mode) {
+            wpca.set_weight(cg::exp_weight(alpha, w));
+        } else {
+            wpca.set_weight(w);
         }
 
         if (points.size() > 1) {
@@ -152,7 +192,7 @@ struct pca_viewer : cg::visualization::viewer_adapter
         for (point_2 p : points) {
             double current_r = (p.x - pnt.x) * (p.x - pnt.x) + (p.y - pnt.y) * (p.y - pnt.y);
 
-            if ((cur_cursor == boost::none && current_r < 100) || (cur_cursor != boost::none && current_r < max_r)) {
+            if ((cur_cursor == boost::none && current_r < 0.001) || (cur_cursor != boost::none && current_r < max_r)) {
                 cur_cursor = p;
                 max_r = current_r;
             }
@@ -183,7 +223,10 @@ private:
 
     weight_type pca_type;
     weighted_pca wpca;
+    cg::weight_t w;
     boost::optional<std::pair<point_2, point_2>> eig_ret;
+    double alpha;
+    bool exp_mode;
 };
 
 int main(int argc, char ** argv)

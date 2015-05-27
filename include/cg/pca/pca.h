@@ -16,8 +16,6 @@ namespace cg
         double val;
     };
 
-    typedef std::function<double(point_2 const &)> weight_t;
-
     enum weight_type
     {
         standard_pca = 1,

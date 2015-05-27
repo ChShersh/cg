@@ -8,6 +8,8 @@
 
 namespace cg
 {
+    typedef std::function<double(point_2 const &)> weight_t;
+
     struct weight
     {
         virtual double operator() (point_2 const & p) const = 0;
@@ -85,5 +87,20 @@ namespace cg
 
     private:
         std::vector<std::vector<double>> cov_matrix;
+    };
+
+    struct exp_weight : weight
+    {
+        exp_weight() : a(1), w(unit_weight()) {}
+        exp_weight(double p, const weight_t & weight_func) : a(p), w(weight_func) {}
+
+        double operator() (point_2 const & p) const
+        {
+            return exp(a * w(p));
+        }
+
+    private:
+        double a;
+        weight_t w;
     };
 }
