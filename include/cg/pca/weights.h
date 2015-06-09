@@ -17,9 +17,9 @@ namespace cg
 
     struct unit_weight : weight
     {
-        double operator() (point_2 const & p) const
+        double operator() (point_2 const &) const
         {
-            return 1;
+            return 1.0;
         }
     };
 
@@ -87,6 +87,22 @@ namespace cg
 
     private:
         std::vector<std::vector<double>> cov_matrix;
+    };
+
+    struct threshold_weight : weight
+    {
+        threshold_weight() : h(0.0), w(unit_weight()) {}
+        threshold_weight(double p, const weight_t & weight_func) : h(p), w(weight_func) {}
+
+        double operator() (point_2 const & p) const
+        {
+            double d = w(p);
+            return (d < h ? 0 : (d - h) * (d - h));
+        }
+
+    private:
+        double h;
+        weight_t w;
     };
 
     struct exp_weight : weight

@@ -26,9 +26,9 @@ struct pca_viewer : cg::visualization::viewer_adapter
     pca_viewer()
         : pca_type(cg::standard_pca),
           eig_ret(boost::none),
-          drag_cursor(boost::none),
-          alpha(1), exp_mode(false)
+          drag_cursor(boost::none)
     {
+        w = cg::unit_weight();
         wpca.set_weight(cg::unit_weight());
     }
 
@@ -55,6 +55,11 @@ struct pca_viewer : cg::visualization::viewer_adapter
             drawer.draw_point(cur_cursor.get(), 5);
         }
 
+        if (threshold_mode) {
+            drawer.set_color(Qt::cyan);
+            drawer.draw_line(point_2{0, h}, point_2{h, 0});
+        }
+
         if (eig_ret != boost::none) {
             double r = 200;
             std::pair<point_2, point_2> eig = eig_ret.get();
@@ -74,9 +79,10 @@ struct pca_viewer : cg::visualization::viewer_adapter
                           << "press 'h' for manhattan WPCA" << cg::visualization::endl
                           << "press 'e' for euclidian WPCA" << cg::visualization::endl
                           << "press 'm' for mahalanobis WPCA" << cg::visualization::endl
-                          << "press 'x' for exponential mode" << cg::visualization::endl;
+                          << "press 'x' for exponential mode" << cg::visualization::endl
+                          << "press 't' for threshold mode" << cg::visualization::endl;
 
-        p.corner_stream() << "current mode: ";
+        p.corner_stream() << "current distance type: ";
         switch (pca_type) {
             case cg::standard_pca: p.corner_stream() << "standard"; break;
             case cg::manhattan_pca: p.corner_stream() << "manhattan"; break;
@@ -88,6 +94,14 @@ struct pca_viewer : cg::visualization::viewer_adapter
         p.corner_stream() << "exp mode: ";
         if (exp_mode) {
             p.corner_stream() << "on (with alpha = " << alpha << ")";
+        } else {
+            p.corner_stream() << "off";
+        }
+        p.corner_stream() << cg::visualization::endl;
+
+        p.corner_stream() << "threshold mode: ";
+        if (threshold_mode) {
+            p.corner_stream() << "on (with h = " << h << ")";
         } else {
             p.corner_stream() << "off";
         }
@@ -153,27 +167,43 @@ struct pca_viewer : cg::visualization::viewer_adapter
                 break;
             case Qt::Key_X:
                 exp_mode = !exp_mode;
+                threshold_mode = false;
+                break;
+            case Qt::Key_T:
+                threshold_mode = !threshold_mode;
+                exp_mode = false;
                 break;
             case Qt::Key_1:
-                alpha = 0.5;
+                if (exp_mode) alpha = 0.5;
+                if (threshold_mode) h = 0.1;
                 break;
             case Qt::Key_2:
-                alpha = 1;
+                if (exp_mode) alpha = 1;
+                if (threshold_mode) h = 0.2;
                 break;
             case Qt::Key_3:
-                alpha = 2;
+                if (exp_mode) alpha = 2;
+                if (threshold_mode) h = 0.3;
                 break;
             case Qt::Key_4:
-                alpha = 3;
+                if (exp_mode) alpha = 3;
+                if (threshold_mode) h = 0.5;
                 break;
             case Qt::Key_5:
-                alpha = 4;
+                if (exp_mode) alpha = 2;
+                if (threshold_mode) h = 1;
+                break;
+            case Qt::Key_0:
+                if (exp_mode) alpha = 0;
+                if (threshold_mode) h = 0;
                 break;
             default: return false;
         }
 
         if (exp_mode) {
             wpca.set_weight(cg::exp_weight(alpha, w));
+        } else if (threshold_mode) {
+            wpca.set_weight(cg::threshold_weight(h, w));
         } else {
             wpca.set_weight(w);
         }
@@ -192,7 +222,7 @@ struct pca_viewer : cg::visualization::viewer_adapter
         for (point_2 p : points) {
             double current_r = (p.x - pnt.x) * (p.x - pnt.x) + (p.y - pnt.y) * (p.y - pnt.y);
 
-            if ((cur_cursor == boost::none && current_r < 0.001) || (cur_cursor != boost::none && current_r < max_r)) {
+            if ((cur_cursor == boost::none && current_r < 0.0005) || (cur_cursor != boost::none && current_r < max_r)) {
                 cur_cursor = p;
                 max_r = current_r;
             }
@@ -225,8 +255,14 @@ private:
     weighted_pca wpca;
     cg::weight_t w;
     boost::optional<std::pair<point_2, point_2>> eig_ret;
-    double alpha;
-    bool exp_mode;
+
+    // for exponential mode
+    double alpha = 1;
+    bool exp_mode = false;
+
+    // for threshold mode
+    double h = 0;
+    bool threshold_mode = false;
 };
 
 int main(int argc, char ** argv)
